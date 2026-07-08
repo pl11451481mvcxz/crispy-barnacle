@@ -1,77 +1,77 @@
-local StarterGui = game:GetService("StarterGui")
-StarterGui:SetCore("SendNotification", {
-    Title = "窗脚本",
+当地的StarterGui=游戏：GetService(本地StarterGui=游戏：GetService("StarterGui"))
+StarterGui:SetCore("发送通知", {
+title="窗脚本",
     Text = "欢迎使用窗脚本",
     Duration = 5,
     Button1 = "确定"
 })
 
-local WindUI = loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"
+当地的WindUI=loadstring(游戏：HttpGet(
+        "https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"
 ))()
 
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local TeleportService = game:GetService("TeleportService")
-local VirtualInputManager = game:GetService("VirtualInputManager")
-local HttpService = game:GetService("HttpService")
+当地的玩家=游戏：GetService("Players")
+当地的UserInputService=game:GetService("UserInputService")
+当地的RunService=game:GetService("RunService")
+当地的TeleportService=游戏：GetService("TeleportService")
+当地的VirtualInputManager=游戏：GetService("VirtualInputManager")
+当地的HTTPService=game:GetService(""Http服务")
 
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local rootPart = character:WaitForChild("HumanoidRootPart")
-local humanoid = character:WaitForChild("Humanoid")
-local camera = workspace.CurrentCamera
+当地的player=players.LocalPlayer
+当地的character=player.字符或播放器。添加的字符：等待()
+当地的rootPart=字符：WaitForChild("HumanoidRootPart")
+当地的humanoid=字符：WaitForChild("Humanoid")
+当地的camera=workspace.CurrentCamera
 
-player.CharacterAdded:Connect(function(newChar)
+player.CharacterAdded：连接(功能(newchar)
     character = newChar
     rootPart = character:WaitForChild("HumanoidRootPart")
     humanoid = character:WaitForChild("Humanoid")
-end)
+    end)
 
 -- 状态
-local noclip = false
-local infiniteJump = false
-local god = false
-local antiAFK = false
-local frozen = false
-local invisible = false
-local esp = false
+当地的n夹=假的
+当地的无限跳转=假的
+当地的上帝=假的
+当地的antiAFK=假的
+本地冻结=false
+局部不可见=false
+本地esp=假的
 local espObj = {}
-local aimbot = false
-local aimRange = 500
-local spinning = false
-local spinSpeed = 10
-local spinConnection = nil
-local nightVision = false
-local playerJoinNotify = false
-local gravityValue = workspace.Gravity
+本地瞄准器=假的
+本地aimRange=500
+局部旋转=false
+本地spinSpeed=10
+局部spinConnection=零
+本地夜视=假的
+本地playerjoinnotify=假的
+局部重力值=工作空间。重力
 
 -- 追踪
-local trackTarget = nil
-local trackConnection = nil
+本地tracktarget=零
+本地trackConnection=零
 
 -- 飞行
-local flyGui = nil
-local nowe = false
-local tpwalking = false
+本地flygui=零
+局部重力值=工作空间。重力
+本地tpwalking=假的
 
-function getPlayerList()
-    local t = {}
-    for _,p in ipairs(Players:GetPlayers()) do if p ~= player then table.insert(t, p.Name) end end
-    return #t > 0 and t or {"无其他玩家"}
-end
+函数getPlayerList()
+局部t={}
+for_，p在ipairs中(players:GetPlayers())如果p~=player，那么table.insert(t，p.Name)结束
+返回#t>0和t或{"无其他玩家"}
+结束
 
-function openFlyGUI()
-    if flyGui then flyGui:Destroy() end
-    local function restoreCharacter()
-        nowe = false; tpwalking = false
-        local sp = game.Players.LocalPlayer
-        if sp.Character then
-            for _, v in ipairs(sp.Character:GetDescendants()) do
-                if v:IsA("BodyGyro") or v:IsA("BodyVelocity") or v:IsA("BodyPosition") then v:Destroy() end
-            end
-            local hum = sp.Character:FindFirstChildOfClass("Humanoid")
+功能openflygui()
+如果flyGuui则flyGuui：销毁()结束
+本地函数restoreCharacter()
+Nowe=false；tpwalking=false
+本地sp=game.Players.LocalPlayer
+如果sp.Character，则
+for_，v在ipairs中(sp.Character:GetDescendants())do
+如果v:Isa("BodyGyro")或v:Isa("BodyVelocity")或v:Isa("BodyPosition")，则v:Destroy()结束
+结束
+局部hum=SP.字符：FindFirstChildOfClass("Humanoid")
             if hum then
                 hum.PlatformStand = false
                 for _, s in ipairs(Enum.HumanoidStateType:GetEnumItems()) do hum:SetStateEnabled(s, true) end
