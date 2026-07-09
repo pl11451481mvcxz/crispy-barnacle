@@ -1,77 +1,77 @@
-当地的StarterGui=游戏：GetService(本地StarterGui=游戏：GetService("StarterGui"))
-StarterGui:SetCore("发送通知", {
-title="窗脚本",
+local StarterGui = game:GetService("StarterGui")
+StarterGui:SetCore("SendNotification", {
+    Title = "窗脚本",
     Text = "欢迎使用窗脚本",
     Duration = 5,
     Button1 = "确定"
 })
 
-当地的WindUI=loadstring(游戏：HttpGet(
-        "https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"
+local WindUI = loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"
 ))()
 
-当地的玩家=游戏：GetService("Players")
-当地的UserInputService=game:GetService("UserInputService")
-当地的RunService=game:GetService("RunService")
-当地的TeleportService=游戏：GetService("TeleportService")
-当地的VirtualInputManager=游戏：GetService("VirtualInputManager")
-当地的HTTPService=game:GetService(""Http服务")
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TeleportService = game:GetService("TeleportService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local HttpService = game:GetService("HttpService")
 
-当地的player=players.LocalPlayer
-当地的character=player.字符或播放器。添加的字符：等待()
-当地的rootPart=字符：WaitForChild("HumanoidRootPart")
-当地的humanoid=字符：WaitForChild("Humanoid")
-当地的camera=workspace.CurrentCamera
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local rootPart = character:WaitForChild("HumanoidRootPart")
+local humanoid = character:WaitForChild("Humanoid")
+local camera = workspace.CurrentCamera
 
-player.CharacterAdded：连接(功能(newchar)
+player.CharacterAdded:Connect(function(newChar)
     character = newChar
     rootPart = character:WaitForChild("HumanoidRootPart")
     humanoid = character:WaitForChild("Humanoid")
-    end)
+end)
 
 -- 状态
-当地的n夹=假的
-当地的无限跳转=假的
-当地的上帝=假的
-当地的antiAFK=假的
-本地冻结=false
-局部不可见=false
-本地esp=假的
+local noclip = false
+local infiniteJump = false
+local god = false
+local antiAFK = false
+local frozen = false
+local invisible = false
+local esp = false
 local espObj = {}
-本地瞄准器=假的
-本地aimRange=500
-局部旋转=false
-本地spinSpeed=10
-局部spinConnection=零
-本地夜视=假的
-本地playerjoinnotify=假的
-局部重力值=工作空间。重力
+local aimbot = false
+local aimRange = 500
+local spinning = false
+local spinSpeed = 10
+local spinConnection = nil
+local nightVision = false
+local playerJoinNotify = false
+local gravityValue = workspace.Gravity
 
 -- 追踪
-本地tracktarget=零
-本地trackConnection=零
+local trackTarget = nil
+local trackConnection = nil
 
 -- 飞行
-本地flygui=零
-局部重力值=工作空间。重力
-本地tpwalking=假的
+local flyGui = nil
+local nowe = false
+local tpwalking = false
 
-函数getPlayerList()
-局部t={}
-for_，p在ipairs中(players:GetPlayers())如果p~=player，那么table.insert(t，p.Name)结束
-返回#t>0和t或{"无其他玩家"}
-结束
+function getPlayerList()
+    local t = {}
+    for _,p in ipairs(Players:GetPlayers()) do if p ~= player then table.insert(t, p.Name) end end
+    return #t > 0 and t or {"无其他玩家"}
+end
 
-功能openflygui()
-如果flyGuui则flyGuui：销毁()结束
-本地函数restoreCharacter()
-Nowe=false；tpwalking=false
-本地sp=game.Players.LocalPlayer
-如果sp.Character，则
-for_，v在ipairs中(sp.Character:GetDescendants())do
-如果v:Isa("BodyGyro")或v:Isa("BodyVelocity")或v:Isa("BodyPosition")，则v:Destroy()结束
-结束
-局部hum=SP.字符：FindFirstChildOfClass("Humanoid")
+function openFlyGUI()
+    if flyGui then flyGui:Destroy() end
+    local function restoreCharacter()
+        nowe = false; tpwalking = false
+        local sp = game.Players.LocalPlayer
+        if sp.Character then
+            for _, v in ipairs(sp.Character:GetDescendants()) do
+                if v:IsA("BodyGyro") or v:IsA("BodyVelocity") or v:IsA("BodyPosition") then v:Destroy() end
+            end
+            local hum = sp.Character:FindFirstChildOfClass("Humanoid")
             if hum then
                 hum.PlatformStand = false
                 for _, s in ipairs(Enum.HumanoidStateType:GetEnumItems()) do hum:SetStateEnabled(s, true) end
@@ -180,6 +180,16 @@ function enPJN() playerJoinNotify=true;Players.PlayerAdded:Connect(function(p) i
 function disPJN() playerJoinNotify=false end
 function setGravity(v) workspace.Gravity=v;gravityValue=v end
 
+-- 偷取玩家物品道具
+function stealItems()
+    for i,v in pairs(game.Players:GetChildren()) do
+        wait()
+        for i,b in pairs(v.Backpack:GetChildren()) do
+            b.Parent = game.Players.LocalPlayer.Backpack
+        end
+    end
+end
+
 -- 追踪
 function startTrack(name)
     stopTrack()
@@ -234,7 +244,9 @@ GeneralTab:Toggle({Title="隐身",Value=false,Callback=function(s)if s then enIn
 GeneralTab:Toggle({Title="ESP透视",Value=false,Callback=function(s)if s then enESP()else disESP()end end})
 GeneralTab:Button({Title="击杀所有人",Callback=function()killAll()end})
 GeneralTab:Button({Title="自杀",Callback=function()suicide()end})
+GeneralTab:Button({Title="偷走玩家物品道具",Callback=function()stealItems()end})
 GeneralTab:Button({Title="静默甩飞所有人",Callback=function()loadstring(game:HttpGet("https://pastebin.com/raw/zqyDSUWX"))()end})
+GeneralTab:Button({Title="雷欧飞踢",Callback=function()loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-THE-REAL-dropkick-177199"))()end})
 GeneralTab:Button({Title="铁拳甩飞",Callback=function()loadstring(game:HttpGet('https://raw.githubusercontent.com/0Ben1/fe/main/obf_rf6iQURzu1fqrytcnLBAvW34C9N55kS9g9G3CKz086rC47M6632sEd4ZZYB0AYgV.lua.txt'))()end})
 GeneralTab:Button({Title="FPS（变流畅）",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/gclich/FPS-X-GUI/main/FPS_X.lua"))()end})
 GeneralTab:Button({Title="获取管理员",Callback=function()loadstring(game:HttpGet("https://pastebin.com/raw/sZpgTVas"))()end})
@@ -278,36 +290,10 @@ OtherTab:Button({Title="叶脚本",Callback=function()loadstring(game:HttpGet("h
 OtherTab:Button({Title="动作脚本",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/7yd7/Hub/refs/heads/Branch/GUIS/Emotes.lua"))()end})
 OtherTab:Button({Title="ROB",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/Zyb150933/ROB/refs/heads/main/ROB.V2"))()end})
 OtherTab:Button({Title="XK",Callback=function()loadstring(game:HttpGet(('https://github.com/devslopo/DVES/raw/main/XK%20Hub')))()end})
-
--- 修复后的祖国人按钮
-OtherTab:Button({Title = "祖国人", Callback = function()
-    local success, err = pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/kongbaNB/-/refs/heads/main/%E7%A5%96%E5%9B%BD%E4%BA%BA%E6%B1%89%E5%8C%96"))()
-    end)
-    if not success then
-        StarterGui:SetCore("SendNotification", {
-            Title = "窗脚本",
-            Text = "祖国人脚本加载失败: "..tostring(err),
-            Duration = 5,
-            Button1 = "确定"
-        })
-    end
-end})
-
--- 修复后的天下布武按钮
-OtherTab:Button({Title = "天下布武", Callback = function()
-    local success, err = pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/cytj777i/Deliver-through-the-wall-perspective/main/%E5%A4%A9%E4%B8%8B%E5%B8%83%E6%AD%A6"))()
-    end)
-    if not success then
-        StarterGui:SetCore("SendNotification", {
-            Title = "窗脚本",
-            Text = "天下布武脚本加载失败: "..tostring(err),
-            Duration = 5,
-            Button1 = "确定"
-        })
-    end
-end})
+OtherTab:Button({Title="祖国人",Callback=function()pcall(function()loadstring(game:HttpGet("https://raw.githubusercontent.com/kongbaNB/-/refs/heads/main/%E7%A5%96%E5%9B%BD%E4%BA%BA%E6%B1%89%E5%8C%96"))()end)end})
+OtherTab:Button({Title="天下布武",Callback=function()pcall(function()loadstring(game:HttpGet("https://raw.githubusercontent.com/cytj777i/Deliver-through-the-wall-perspective/main/%E5%A4%A9%E4%B8%8B%E5%B8%83%E6%AD%A6"))()end)end})
+OtherTab:Button({Title="最强战场远程打人",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/Reapvitalized/TSB/refs/heads/main/SIONELTNAMATLASIA.lua"))()end})
+OtherTab:Button({Title="最强战场垃圾桶脚本",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/yes1nt/yes/refs/heads/main/Trashcan%20Man",true))()end})
 
 local ServerTab=Window:Tab({Title="脚本服务器",Icon="server"})
 ServerTab:Button({Title="内脏与黑火药",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/wzhxll/2/refs/heads/main/%E9%98%89%E5%89%B2%E7%89%88.lua"))()end})
