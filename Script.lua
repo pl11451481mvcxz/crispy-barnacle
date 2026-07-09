@@ -6,9 +6,32 @@ StarterGui:SetCore("SendNotification", {
     Button1 = "确定"
 })
 
-local WindUI = loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"
-))()
+-- 检查执行器
+if not identifyexecutor then
+    StarterGui:SetCore("SendNotification", {
+        Title = "错误",
+        Text = "不支持的注入器",
+        Duration = 5
+    })
+    return
+end
+
+-- WindUI加载（添加保护）
+local WindUI = nil
+local success, err = pcall(function()
+    WindUI = loadstring(game:HttpGet(
+        "https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"
+    ))()
+end)
+
+if not WindUI then
+    StarterGui:SetCore("SendNotification", {
+        Title = "错误",
+        Text = "UI库加载失败: " .. tostring(err),
+        Duration = 5
+    })
+    return
+end
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -92,7 +115,15 @@ function openFlyGUI()
     local closebutton = Instance.new("TextButton")
     local mini = Instance.new("TextButton")
     local mini2 = Instance.new("TextButton")
-    main.Name = "main"; main.Parent = player:WaitForChild("PlayerGui"); main.ZIndexBehavior = Enum.ZIndexBehavior.Sibling; main.ResetOnSpawn = false
+    main.Name = "main"
+    -- 尝试放入CoreGui，失败则放入PlayerGui
+    local success = pcall(function()
+        main.Parent = game:GetService("CoreGui")
+    end)
+    if not success then
+        main.Parent = player:WaitForChild("PlayerGui")
+    end
+    main.ZIndexBehavior = Enum.ZIndexBehavior.Sibling; main.ResetOnSpawn = false
     Frame.Parent = main; Frame.BackgroundColor3 = Color3.fromRGB(255,255,255); Frame.BorderColor3 = Color3.fromRGB(103,221,213)
     Frame.Position = UDim2.new(0.1,0,0.38,0); Frame.Size = UDim2.new(0,190,0,57)
     up.Name = "up"; up.Parent = Frame; up.BackgroundColor3 = Color3.fromRGB(255,255,255); up.Size = UDim2.new(0,44,0,28); up.Font = Enum.Font.SourceSans; up.Text = "上升"; up.TextColor3 = Color3.fromRGB(0,0,0); up.TextSize = 14
@@ -106,7 +137,7 @@ function openFlyGUI()
     mini.Name = "minimize"; mini.Parent = Frame; mini.BackgroundColor3 = Color3.fromRGB(255,255,255); mini.Font = "SourceSans"; mini.Size = UDim2.new(0,45,0,28); mini.Text = "-"; mini.TextSize = 40; mini.Position = UDim2.new(0,44,-1,27)
     mini2.Name = "minimize2"; mini2.Parent = Frame; mini2.BackgroundColor3 = Color3.fromRGB(255,255,255); mini2.Font = "SourceSans"; mini2.Size = UDim2.new(0,45,0,28); mini2.Text = "+"; mini2.TextSize = 40; mini2.Position = UDim2.new(0,44,-1,57); mini2.Visible = false
     local speeds = 1; Frame.Active = true; Frame.Draggable = true
-    onof.MouseButton1Down:connect(function()
+    onof.MouseButton1Down:Connect(function()
         if nowe then restoreCharacter(); return end
         if not player.Character then return end
         nowe = true; tpwalking = true
@@ -136,12 +167,12 @@ function openFlyGUI()
             end
         end
     end)
-    local tis; up.MouseButton1Down:connect(function() tis = RunService.Heartbeat:Connect(function() local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart"); if hrp then hrp.CFrame = hrp.CFrame * CFrame.new(0,1,0) end end) end)
-    up.MouseLeave:connect(function() if tis then tis:Disconnect(); tis=nil end end); up.MouseButton1Up:connect(function() if tis then tis:Disconnect(); tis=nil end end)
-    local dis; down.MouseButton1Down:connect(function() dis = RunService.Heartbeat:Connect(function() local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart"); if hrp then hrp.CFrame = hrp.CFrame * CFrame.new(0,-1,0) end end) end)
-    down.MouseLeave:connect(function() if dis then dis:Disconnect(); dis=nil end end); down.MouseButton1Up:connect(function() if dis then dis:Disconnect(); dis=nil end end)
-    plus.MouseButton1Down:connect(function() speeds=speeds+1; speed.Text=speeds; if nowe then tpwalking=false; for i=1,speeds do spawn(function() local hb=RunService.Heartbeat; tpwalking=true; while tpwalking and hb:Wait() and player.Character do local chr=player.Character; local hum=chr and chr:FindFirstChildWhichIsA("Humanoid"); if hum and hum.MoveDirection.Magnitude>0 then chr:TranslateBy(hum.MoveDirection) end end end) end end end)
-    mine.MouseButton1Down:connect(function() if speeds==1 then speed.Text='不能小于1'; wait(1); speed.Text=speeds else speeds=speeds-1; speed.Text=speeds; if nowe then tpwalking=false; for i=1,speeds do spawn(function() local hb=RunService.Heartbeat; tpwalking=true; while tpwalking and hb:Wait() and player.Character do local chr=player.Character; local hum=chr and chr:FindFirstChildWhichIsA("Humanoid"); if hum and hum.MoveDirection.Magnitude>0 then chr:TranslateBy(hum.MoveDirection) end end end) end end end end)
+    local tis; up.MouseButton1Down:Connect(function() tis = RunService.Heartbeat:Connect(function() local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart"); if hrp then hrp.CFrame = hrp.CFrame * CFrame.new(0,1,0) end end) end)
+    up.MouseLeave:Connect(function() if tis then tis:Disconnect(); tis=nil end end); up.MouseButton1Up:Connect(function() if tis then tis:Disconnect(); tis=nil end end)
+    local dis; down.MouseButton1Down:Connect(function() dis = RunService.Heartbeat:Connect(function() local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart"); if hrp then hrp.CFrame = hrp.CFrame * CFrame.new(0,-1,0) end end) end)
+    down.MouseLeave:Connect(function() if dis then dis:Disconnect(); dis=nil end end); down.MouseButton1Up:Connect(function() if dis then dis:Disconnect(); dis=nil end end)
+    plus.MouseButton1Down:Connect(function() speeds=speeds+1; speed.Text=speeds; if nowe then tpwalking=false; for i=1,speeds do spawn(function() local hb=RunService.Heartbeat; tpwalking=true; while tpwalking and hb:Wait() and player.Character do local chr=player.Character; local hum=chr and chr:FindFirstChildWhichIsA("Humanoid"); if hum and hum.MoveDirection.Magnitude>0 then chr:TranslateBy(hum.MoveDirection) end end end) end end end)
+    mine.MouseButton1Down:Connect(function() if speeds==1 then speed.Text='不能小于1'; wait(1); speed.Text=speeds else speeds=speeds-1; speed.Text=speeds; if nowe then tpwalking=false; for i=1,speeds do spawn(function() local hb=RunService.Heartbeat; tpwalking=true; while tpwalking and hb:Wait() and player.Character do local chr=player.Character; local hum=chr and chr:FindFirstChildWhichIsA("Humanoid"); if hum and hum.MoveDirection.Magnitude>0 then chr:TranslateBy(hum.MoveDirection) end end end) end end end end)
     closebutton.MouseButton1Click:Connect(function() restoreCharacter(); main:Destroy() end)
     mini.MouseButton1Click:Connect(function() up.Visible=false;down.Visible=false;onof.Visible=false;plus.Visible=false;speed.Visible=false;mine.Visible=false;mini.Visible=false;mini2.Visible=true; Frame.BackgroundTransparency=1; closebutton.Position=UDim2.new(0,0,-1,57) end)
     mini2.MouseButton1Click:Connect(function() up.Visible=true;down.Visible=true;onof.Visible=true;plus.Visible=true;speed.Visible=true;mine.Visible=true;mini.Visible=true;mini2.Visible=false; Frame.BackgroundTransparency=0; closebutton.Position=UDim2.new(0,0,-1,27) end)
@@ -221,100 +252,134 @@ end
 
 local musicData={}
 local musicFile="chuang_music.json"
-pcall(function() musicData=HttpService:JSONDecode(readfile(musicFile)) end)
+-- 安全加载音乐数据
+if writefile and readfile and isfile then
+    pcall(function() 
+        if isfile(musicFile) then
+            musicData=HttpService:JSONDecode(readfile(musicFile)) 
+        end
+    end)
+end
 
 -- UI
-local Window=WindUI:CreateWindow({Title="窗脚本",Icon="zap",Theme="Indigo",KeySystem={Key={"何意味"},SaveKey=true}})
+local Window = WindUI:CreateWindow({
+    Title = "窗脚本",
+    Icon = "zap",
+    Theme = "Indigo",
+    KeySystem = {Key = {"何意味"}, SaveKey = true}
+})
 
-local NoticeTab=Window:Tab({Title="公告",Icon="megaphone"})
-NoticeTab:Button({Title="脚本功能少",Callback=function()end})
-NoticeTab:Button({Title="脚本是让AI写的",Callback=function()end})
-NoticeTab:Button({Title="脚本完全免费",Callback=function()end})
-NoticeTab:Button({Title="注入器: "..(identifyexecutor and identifyexecutor() or "未知"),Callback=function()end})
-NoticeTab:Button({Title="用户名: "..player.Name,Callback=function()end})
+local NoticeTab = Window:Tab({Title = "公告", Icon = "megaphone"})
+NoticeTab:Button({Title = "脚本功能少", Callback = function() end})
+NoticeTab:Button({Title = "脚本是让AI写的", Callback = function() end})
+NoticeTab:Button({Title = "脚本完全免费", Callback = function() end})
+NoticeTab:Button({Title = "注入器: "..(identifyexecutor and identifyexecutor() or "未知"), Callback = function() end})
+NoticeTab:Button({Title = "用户名: "..player.Name, Callback = function() end})
 
-local GeneralTab=Window:Tab({Title="通用",Icon="user"})
-GeneralTab:Button({Title="窗飞行",Callback=function()openFlyGUI()end})
-GeneralTab:Toggle({Title="穿墙",Value=false,Callback=function(s)if s then enNoclip()else disNoclip()end end})
-GeneralTab:Slider({Title="走路速度",Value={Min=16,Max=500,Default=16},Step=5,Callback=function(v)setWS(v)end})
-GeneralTab:Toggle({Title="无限跳",Value=false,Callback=function(s)if s then enIJ()else disIJ()end end})
-GeneralTab:Toggle({Title="无法移动",Value=false,Callback=function(s)if s then enFrozen()else disFrozen()end end})
-GeneralTab:Toggle({Title="无敌",Value=false,Callback=function(s)if s then enGod()else disGod()end end})
-GeneralTab:Toggle({Title="隐身",Value=false,Callback=function(s)if s then enInvisible()else disInvisible()end end})
-GeneralTab:Toggle({Title="ESP透视",Value=false,Callback=function(s)if s then enESP()else disESP()end end})
-GeneralTab:Button({Title="击杀所有人",Callback=function()killAll()end})
-GeneralTab:Button({Title="自杀",Callback=function()suicide()end})
-GeneralTab:Button({Title="偷走玩家物品道具",Callback=function()stealItems()end})
-GeneralTab:Button({Title="静默甩飞所有人",Callback=function()loadstring(game:HttpGet("https://pastebin.com/raw/zqyDSUWX"))()end})
-GeneralTab:Button({Title="雷欧飞踢",Callback=function()loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-THE-REAL-dropkick-177199"))()end})
-GeneralTab:Button({Title="铁拳甩飞",Callback=function()loadstring(game:HttpGet('https://raw.githubusercontent.com/0Ben1/fe/main/obf_rf6iQURzu1fqrytcnLBAvW34C9N55kS9g9G3CKz086rC47M6632sEd4ZZYB0AYgV.lua.txt'))()end})
-GeneralTab:Button({Title="FPS（变流畅）",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/gclich/FPS-X-GUI/main/FPS_X.lua"))()end})
-GeneralTab:Button({Title="获取管理员",Callback=function()loadstring(game:HttpGet("https://pastebin.com/raw/sZpgTVas"))()end})
-GeneralTab:Button({Title="死亡笔记",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/dingding123hhh/tt/main/%E6%AD%BB%E4%BA%A1%E7%AC%94%E8%AE%B0%20(1).txt"))()end})
-GeneralTab:Button({Title="飞车",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/dingding123hhh/vb/main/%E9%A3%9E%E8%BD%A6.lua"))()end})
-GeneralTab:Button({Title="r15无敌少侠飞行脚本",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/396abc/Script/refs/heads/main/MobileFly.lua"))()end})
-GeneralTab:Button({Title="r6无敌少侠飞行脚本",Callback=function()loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Invincible-Mark-42041"))()end})
-GeneralTab:Button({Title="r6鹿管脚本",Callback=function()loadstring(game:HttpGet("https://pastefy.app/wa3v2Vgm/raw"))()end})
-GeneralTab:Button({Title="r15鹿管脚本",Callback=function()loadstring(game:HttpGet("https://pastefy.app/YZoglOyJ/raw"))()end})
-GeneralTab:Toggle({Title="旋转",Value=false,Callback=function(s)if s then enSpin()else disSpin()end end})
-GeneralTab:Slider({Title="旋转速度",Value={Min=1,Max=50,Default=10},Step=1,Callback=function(v)setSpinSpeed(v)end})
-GeneralTab:Toggle({Title="夜视",Value=false,Callback=function(s)if s then enNV()else disNV()end end})
-GeneralTab:Toggle({Title="玩家进入通知",Value=false,Callback=function(s)if s then enPJN()else disPJN()end end})
-GeneralTab:Slider({Title="重力设置",Value={Min=0,Max=500,Default=gravityValue},Step=10,Callback=function(v)setGravity(v)end})
-GeneralTab:Slider({Title="自瞄范围",Value={Min=100,Max=1000,Default=500},Step=50,Callback=function(v)aimRange=v end})
-GeneralTab:Toggle({Title="自瞄",Value=false,Callback=function(s)if s then enAimbot()else disAimbot()end end})
-GeneralTab:Toggle({Title="反挂机",Value=false,Callback=function(s)if s then enAFK()else disAFK()end end})
-GeneralTab:Button({Title="重新加入",Callback=function()rejoin()end})
-GeneralTab:Button({Title="离开游戏",Callback=function()leave()end})
-GeneralTab:Button({Title="关闭脚本",Callback=function()closeScript()end})
+local GeneralTab = Window:Tab({Title = "通用", Icon = "user"})
+GeneralTab:Button({Title = "窗飞行", Callback = function() openFlyGUI() end})
+GeneralTab:Toggle({Title = "穿墙", Value = false, Callback = function(s) if s then enNoclip() else disNoclip() end end})
+GeneralTab:Slider({Title = "走路速度", Value = {Min = 16, Max = 500, Default = 16}, Step = 5, Callback = function(v) setWS(v) end})
+GeneralTab:Toggle({Title = "无限跳", Value = false, Callback = function(s) if s then enIJ() else disIJ() end end})
+GeneralTab:Toggle({Title = "无法移动", Value = false, Callback = function(s) if s then enFrozen() else disFrozen() end end})
+GeneralTab:Toggle({Title = "无敌", Value = false, Callback = function(s) if s then enGod() else disGod() end end})
+GeneralTab:Toggle({Title = "隐身", Value = false, Callback = function(s) if s then enInvisible() else disInvisible() end end})
+GeneralTab:Toggle({Title = "ESP透视", Value = false, Callback = function(s) if s then enESP() else disESP() end end})
+GeneralTab:Button({Title = "击杀所有人", Callback = function() killAll() end})
+GeneralTab:Button({Title = "自杀", Callback = function() suicide() end})
+GeneralTab:Button({Title = "偷走玩家物品道具", Callback = function() stealItems() end})
+GeneralTab:Button({Title = "静默甩飞所有人", Callback = function() loadstring(game:HttpGet("https://pastebin.com/raw/zqyDSUWX"))() end})
+GeneralTab:Button({Title = "雷欧飞踢", Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-THE-REAL-dropkick-177199"))() end})
+GeneralTab:Button({Title = "铁拳甩飞", Callback = function() loadstring(game:HttpGet('https://raw.githubusercontent.com/0Ben1/fe/main/obf_rf6iQURzu1fqrytcnLBAvW34C9N55kS9g9G3CKz086rC47M6632sEd4ZZYB0AYgV.lua.txt'))() end})
+GeneralTab:Button({Title = "FPS（变流畅）", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/gclich/FPS-X-GUI/main/FPS_X.lua"))() end})
+GeneralTab:Button({Title = "获取管理员", Callback = function() loadstring(game:HttpGet("https://pastebin.com/raw/sZpgTVas"))() end})
+GeneralTab:Button({Title = "死亡笔记", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/dingding123hhh/tt/main/%E6%AD%BB%E4%BA%A1%E7%AC%94%E8%AE%B0%20(1).txt"))() end})
+GeneralTab:Button({Title = "飞车", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/dingding123hhh/vb/main/%E9%A3%9E%E8%BD%A6.lua"))() end})
+GeneralTab:Button({Title = "r15无敌少侠飞行脚本", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/396abc/Script/refs/heads/main/MobileFly.lua"))() end})
+GeneralTab:Button({Title = "r6无敌少侠飞行脚本", Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Invincible-Mark-42041"))() end})
+GeneralTab:Button({Title = "r6鹿管脚本", Callback = function() loadstring(game:HttpGet("https://pastefy.app/wa3v2Vgm/raw"))() end})
+GeneralTab:Button({Title = "r15鹿管脚本", Callback = function() loadstring(game:HttpGet("https://pastefy.app/YZoglOyJ/raw"))() end})
+GeneralTab:Toggle({Title = "旋转", Value = false, Callback = function(s) if s then enSpin() else disSpin() end end})
+GeneralTab:Slider({Title = "旋转速度", Value = {Min = 1, Max = 50, Default = 10}, Step = 1, Callback = function(v) setSpinSpeed(v) end})
+GeneralTab:Toggle({Title = "夜视", Value = false, Callback = function(s) if s then enNV() else disNV() end end})
+GeneralTab:Toggle({Title = "玩家进入通知", Value = false, Callback = function(s) if s then enPJN() else disPJN() end end})
+GeneralTab:Slider({Title = "重力设置", Value = {Min = 0, Max = 500, Default = gravityValue}, Step = 10, Callback = function(v) setGravity(v) end})
+GeneralTab:Slider({Title = "自瞄范围", Value = {Min = 100, Max = 1000, Default = 500}, Step = 50, Callback = function(v) aimRange = v end})
+GeneralTab:Toggle({Title = "自瞄", Value = false, Callback = function(s) if s then enAimbot() else disAimbot() end end})
+GeneralTab:Toggle({Title = "反挂机", Value = false, Callback = function(s) if s then enAFK() else disAFK() end end})
+GeneralTab:Button({Title = "重新加入", Callback = function() rejoin() end})
+GeneralTab:Button({Title = "离开游戏", Callback = function() leave() end})
+GeneralTab:Button({Title = "关闭脚本", Callback = function() closeScript() end})
 
-local FlingTab=Window:Tab({Title="甩飞",Icon="zap"})
-local flingDropdown=FlingTab:Dropdown({Title="选择玩家",Values=getPlayerList(),Value="",Callback=function(v)end})
-FlingTab:Button({Title="甩飞一次",Callback=function()local v=flingDropdown.Value;if v and v~=""and v~="无其他玩家"then flingOne(v)end end})
-FlingTab:Button({Title="刷新列表",Callback=function()flingDropdown:Refresh(getPlayerList())end})
+local FlingTab = Window:Tab({Title = "甩飞", Icon = "zap"})
+local flingDropdown = FlingTab:Dropdown({Title = "选择玩家", Values = getPlayerList(), Value = "", Callback = function(v) end})
+FlingTab:Button({Title = "甩飞一次", Callback = function() local v = flingDropdown.Value; if v and v ~= "" and v ~= "无其他玩家" then flingOne(v) end end})
+FlingTab:Button({Title = "刷新列表", Callback = function() flingDropdown:Refresh(getPlayerList()) end})
 
-local TrackingTab=Window:Tab({Title="追踪类",Icon="crosshair"})
-local trackDropdown=TrackingTab:Dropdown({Title="追踪玩家",Values=getPlayerList(),Value="",Callback=function(v)if v~=""then startTrack(v)end end})
-TrackingTab:Button({Title="停止追踪",Callback=function()stopTrack()end})
-TrackingTab:Button({Title="刷新列表",Callback=function()trackDropdown:Refresh(getPlayerList())end})
-local circling=false
-TrackingTab:Toggle({Title="转圈",Value=false,Callback=function(s)circling=s;if s then spawn(function()local a=0;while circling and player.Character and player.Character:FindFirstChild("HumanoidRootPart")do a=a+0.1;player.Character.HumanoidRootPart.CFrame=player.Character.HumanoidRootPart.CFrame*CFrame.Angles(0,0.1,0)+Vector3.new(math.cos(a)*0.5,0,math.sin(a)*0.5);wait()end end)end end})
+local TrackingTab = Window:Tab({Title = "追踪类", Icon = "crosshair"})
+local trackDropdown = TrackingTab:Dropdown({Title = "追踪玩家", Values = getPlayerList(), Value = "", Callback = function(v) if v ~= "" then startTrack(v) end end})
+TrackingTab:Button({Title = "停止追踪", Callback = function() stopTrack() end})
+TrackingTab:Button({Title = "刷新列表", Callback = function() trackDropdown:Refresh(getPlayerList()) end})
+local circling = false
+TrackingTab:Toggle({Title = "转圈", Value = false, Callback = function(s) circling = s; if s then spawn(function() local a = 0; while circling and player.Character and player.Character:FindFirstChild("HumanoidRootPart") do a = a + 0.1; player.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame * CFrame.Angles(0,0.1,0) + Vector3.new(math.cos(a)*0.5,0,math.sin(a)*0.5); wait() end end) end end})
 
-local InjectorTab=Window:Tab({Title="注入器",Icon="download"})
-InjectorTab:Button({Title="阿尔宙斯注入器3.0",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/AZYsGithub/chillz-workshop/main/Arceus%20X%20V3"))()end})
+local InjectorTab = Window:Tab({Title = "注入器", Icon = "download"})
+InjectorTab:Button({Title = "阿尔宙斯注入器3.0", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/AZYsGithub/chillz-workshop/main/Arceus%20X%20V3"))() end})
 
-local OtherTab=Window:Tab({Title="其他脚本",Icon="code"})
-OtherTab:Button({Title="皮脚本",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/xiaopi77/xiaopi77/main/QQ1002100032-Roblox-Pi-script.lua"))()end})
-OtherTab:Button({Title="tsb脚本",Callback=function()local k="YPVdAosoAvaXrtZAdEYxCQRBEwbphCXq";pcall(function()setclipboard(k)end);loadstring(game:HttpGet("https://raw.githubusercontent.com/DiosDi/VexonHub/refs/heads/main/VexonHub"))()end})
-OtherTab:Button({Title="叶脚本",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/roblox-ye/QQ515966991/refs/heads/main/ROBLOX-CNVIP-XIAOYE.lua"))()end})
-OtherTab:Button({Title="动作脚本",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/7yd7/Hub/refs/heads/Branch/GUIS/Emotes.lua"))()end})
-OtherTab:Button({Title="ROB",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/Zyb150933/ROB/refs/heads/main/ROB.V2"))()end})
-OtherTab:Button({Title="XK",Callback=function()loadstring(game:HttpGet(('https://github.com/devslopo/DVES/raw/main/XK%20Hub')))()end})
-OtherTab:Button({Title="祖国人",Callback=function()pcall(function()loadstring(game:HttpGet("https://raw.githubusercontent.com/kongbaNB/-/refs/heads/main/%E7%A5%96%E5%9B%BD%E4%BA%BA%E6%B1%89%E5%8C%96"))()end)end})
-OtherTab:Button({Title="天下布武",Callback=function()pcall(function()loadstring(game:HttpGet("https://raw.githubusercontent.com/cytj777i/Deliver-through-the-wall-perspective/main/%E5%A4%A9%E4%B8%8B%E5%B8%83%E6%AD%A6"))()end)end})
-OtherTab:Button({Title="最强战场远程打人",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/Reapvitalized/TSB/refs/heads/main/SIONELTNAMATLASIA.lua"))()end})
-OtherTab:Button({Title="最强战场垃圾桶脚本",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/yes1nt/yes/refs/heads/main/Trashcan%20Man",true))()end})
+local OtherTab = Window:Tab({Title = "其他脚本", Icon = "code"})
+OtherTab:Button({Title = "皮脚本", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/xiaopi77/xiaopi77/main/QQ1002100032-Roblox-Pi-script.lua"))() end})
+OtherTab:Button({Title = "tsb脚本", Callback = function() local k = "YPVdAosoAvaXrtZAdEYxCQRBEwbphCXq"; pcall(function() setclipboard(k) end); loadstring(game:HttpGet("https://raw.githubusercontent.com/DiosDi/VexonHub/refs/heads/main/VexonHub"))() end})
+OtherTab:Button({Title = "叶脚本", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/roblox-ye/QQ515966991/refs/heads/main/ROBLOX-CNVIP-XIAOYE.lua"))() end})
+OtherTab:Button({Title = "动作脚本", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/7yd7/Hub/refs/heads/Branch/GUIS/Emotes.lua"))() end})
+OtherTab:Button({Title = "ROB", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Zyb150933/ROB/refs/heads/main/ROB.V2"))() end})
+OtherTab:Button({Title = "XK", Callback = function() loadstring(game:HttpGet(('https://github.com/devslopo/DVES/raw/main/XK%20Hub')))() end})
+OtherTab:Button({Title = "祖国人", Callback = function() pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/kongbaNB/-/refs/heads/main/%E7%A5%96%E5%9B%BD%E4%BA%BA%E6%B1%89%E5%8C%96"))() end) end})
+OtherTab:Button({Title = "天下布武", Callback = function() pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/cytj777i/Deliver-through-the-wall-perspective/main/%E5%A4%A9%E4%B8%8B%E5%B8%83%E6%AD%A6"))() end) end})
+OtherTab:Button({Title = "最强战场远程打人", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Reapvitalized/TSB/refs/heads/main/SIONELTNAMATLASIA.lua"))() end})
+OtherTab:Button({Title = "最强战场垃圾桶脚本", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/yes1nt/yes/refs/heads/main/Trashcan%20Man",true))() end})
+OtherTab:Button({Title = "黑白脚本", Callback = function() loadstring(game:HttpGet('https://raw.githubusercontent.com/tfcygvunbind/Apple/main/%E9%BB%91%E7%99%BD%E8%84%9A%E6%9C%AC%E5%8A%A0%E8%BD%BD%E5%99%A8'))() end})
 
-local ServerTab=Window:Tab({Title="脚本服务器",Icon="server"})
-ServerTab:Button({Title="内脏与黑火药",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/wzhxll/2/refs/heads/main/%E9%98%89%E5%89%B2%E7%89%88.lua"))()end})
-ServerTab:Button({Title="TSB脚本",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/ke9460394-dot/ugik/refs/heads/main/phantasm.lua"))()end})
-ServerTab:Button({Title="监狱人生脚本",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/f34p9fh3a4/.xyz/refs/heads/main/loader.lua"))()end})
-ServerTab:Button({Title="破坏者谜团2脚本",Callback=function()loadstring(game:HttpGet(("https://raw.githubusercontent.com/Ethanoj1/EclipseMM2/master/Script"),true))()end})
-ServerTab:Button({Title="99夜脚本",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/atnew2025/Chinese-scripts/refs/heads/main/voidware-cn.txt"))()end})
-ServerTab:Button({Title="doors",Callback=function()loadstring(game:HttpGet("\104\116\116\112\115\58\47\47\112\97\115\116\101\98\105\110\46\99\111\109\47\114\97\119\47\54\53\84\119\84\56\106\97"))()end})
-ServerTab:Button({Title="自然灾害",Callback=function()loadstring(game:HttpGet("https://pastebin.com/raw/5fKvum70"))()end})
-ServerTab:Button({Title="LC",Callback=function()loadstring(game:HttpGet("https://rawscripts.net/raw/Lexington-and-Concord-LC-75016"))()end})
-ServerTab:Button({Title="墨水游戏",Callback=function()loadstring(game:HttpGet("https://pastebin.com/raw/sR98CDWm"))()end})
-ServerTab:Button({Title="俄亥俄州",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/XingFork/Scripts/refs/heads/main/Ohio"))()end})
-ServerTab:Button({Title="被遗弃",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/FengYu-X/Max/refs/heads/X/fsk.lua"))()end})
+local ServerTab = Window:Tab({Title = "脚本服务器", Icon = "server"})
+ServerTab:Button({Title = "内脏与黑火药", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/wzhxll/2/refs/heads/main/%E9%98%89%E5%89%B2%E7%89%88.lua"))() end})
+ServerTab:Button({Title = "TSB脚本", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/ke9460394-dot/ugik/refs/heads/main/phantasm.lua"))() end})
+ServerTab:Button({Title = "监狱人生脚本", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/f34p9fh3a4/.xyz/refs/heads/main/loader.lua"))() end})
+ServerTab:Button({Title = "破坏者谜团2脚本", Callback = function() loadstring(game:HttpGet(("https://raw.githubusercontent.com/Ethanoj1/EclipseMM2/master/Script"),true))() end})
+ServerTab:Button({Title = "99夜脚本", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/atnew2025/Chinese-scripts/refs/heads/main/voidware-cn.txt"))() end})
+ServerTab:Button({Title = "doors", Callback = function() loadstring(game:HttpGet("\104\116\116\112\115\58\47\47\112\97\115\116\101\98\105\110\46\99\111\109\47\114\97\119\47\54\53\84\119\84\56\106\97"))() end})
+ServerTab:Button({Title = "自然灾害", Callback = function() loadstring(game:HttpGet("https://pastebin.com/raw/5fKvum70"))() end})
+ServerTab:Button({Title = "LC", Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Lexington-and-Concord-LC-75016"))() end})
+ServerTab:Button({Title = "墨水游戏", Callback = function() loadstring(game:HttpGet("https://pastebin.com/raw/sR98CDWm"))() end})
+ServerTab:Button({Title = "俄亥俄州", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/XingFork/Scripts/refs/heads/main/Ohio"))() end})
+ServerTab:Button({Title = "被遗弃", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/FengYu-X/Max/refs/heads/X/fsk.lua"))() end})
 
-local FETab=Window:Tab({Title="FE脚本",Icon="flame"})
-FETab:Button({Title="coolgui",Callback=function()loadstring(game:GetObjects("rbxassetid://8127297852")[1].Source)()end})
-FETab:Button({Title="1x1x1x1",Callback=function()loadstring(game:HttpGet(('https://pastebin.com/raw/JipYNCht'),true))()end})
-FETab:Button({Title="变玩家（R6）",Callback=function()loadstring(game:HttpGet("https://pastebin.com/raw/XR4sGcgJ"))()end})
-FETab:Button({Title="动画中心",Callback=function()loadstring(game:HttpGet("https://raw.githubusercontent.com/GamingScripter/Animation-Hub/main/Animation%20Gui",true))()end})
+local FETab = Window:Tab({Title = "FE脚本", Icon = "flame"})
+FETab:Button({Title = "coolgui", Callback = function() loadstring(game:GetObjects("rbxassetid://8127297852")[1].Source)() end})
+FETab:Button({Title = "1x1x1x1", Callback = function() loadstring(game:HttpGet(('https://pastebin.com/raw/JipYNCht'),true))() end})
+FETab:Button({Title = "变玩家（R6）", Callback = function() loadstring(game:HttpGet("https://pastebin.com/raw/XR4sGcgJ"))() end})
+FETab:Button({Title = "动画中心", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/GamingScripter/Animation-Hub/main/Animation%20Gui",true))() end})
 
-local MusicTab=Window:Tab({Title="音乐",Icon="music"})
-local musicInput=MusicTab:Input({Title="音乐代码",Value="",Placeholder="输入音乐ID",Callback=function(t)end})
-MusicTab:Button({Title="播放",Callback=function()local code=musicInput.Value;if code and code~=""then local sound=Instance.new("Sound",workspace);sound.SoundId="rbxassetid://"..code;sound.Volume=1;sound:Play();table.insert(musicData,code);pcall(function()writefile(musicFile,HttpService:JSONEncode(musicData))end)end end})
-MusicTab:Button({Title="停止",Callback=function()for _,v in ipairs(workspace:GetChildren())do if v:IsA("Sound")then v:Stop();v:Destroy()end end end})
+local MusicTab = Window:Tab({Title = "音乐", Icon = "music"})
+local musicInput = MusicTab:Input({Title = "音乐代码", Value = "", Placeholder = "输入音乐ID", Callback = function(t) end})
+MusicTab:Button({Title = "播放", Callback = function()
+    local code = musicInput.Value
+    if code and code ~= "" then
+        local sound = Instance.new("Sound", workspace)
+        sound.SoundId = "rbxassetid://" .. code
+        sound.Volume = 1
+        sound:Play()
+        table.insert(musicData, code)
+        -- 安全检查文件写入
+        if writefile then
+            pcall(function() writefile(musicFile, HttpService:JSONEncode(musicData)) end)
+        end
+    end
+end})
+MusicTab:Button({Title = "停止", Callback = function()
+    for _,v in ipairs(workspace:GetChildren()) do
+        if v:IsA("Sound") then
+            v:Stop()
+            v:Destroy()
+        end
+    end
+end})
+    
